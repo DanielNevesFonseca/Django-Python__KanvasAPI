@@ -16,7 +16,7 @@ class Course(models.Model):
     status = models.CharField(
         choices=CourseStatus.choices,
         default=CourseStatus.NOT_STARTED,
-        max_length=255,
+        max_length=11,
     )
 
     # Relationship with Account:Course -> 1:N
