@@ -9,8 +9,15 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
 from pathlib import Path
+
+import os
+import sys
+import dotenv
+
+# CHANGE: LOAD VARS ON .ENV
+dotenv.load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-7p!ogz)mga0w42y!30g^714wi5vsof-2fop^@eqn2z&1ciyg(-"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,17 +46,9 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = [
-    "rest_framework",
-    "django_filters"
-]
+THIRD_PARTY_APPS = ["rest_framework", "django_filters"]
 
-MY_CREATED_APPS = [
-    "accounts",
-    "contents",
-    "courses",
-    "students_courses"
-]
+MY_CREATED_APPS = ["accounts", "contents", "courses", "students_courses"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + MY_CREATED_APPS
 
@@ -89,11 +88,34 @@ WSGI_APPLICATION = "_core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
     }
 }
 
+""" # CHANGE: CONFIG FOR RUN TEST ON OTHER DATABASE
+DATABASES["test"] = {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": os.getenv("POSTGRES_DB_TEST"),
+    "USER": os.getenv("POSTGRES_USER"),
+    "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+    "HOST": "127.0.0.1",
+    "PORT": 5432,
+}
+
+# CHANGE: ADDITIONAL CONFIG FOR RUNNING TESTS
+if "test" in sys.argv:
+    DATABASES["default"] = DATABASES["test"]
+
+    # Configure outros ajustes necessários para testes aqui
+
+    # Exemplo de configuração para usar o banco de dados em memória para testes
+    # DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+    # DATABASES['default']['NAME'] = ':memory:' """
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
