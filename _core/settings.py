@@ -46,7 +46,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = ["rest_framework", "django_filters"]
+THIRD_PARTY_APPS = ["rest_framework", "django_filters", "drf_spectacular"]
 
 MY_CREATED_APPS = ["accounts", "contents", "courses", "students_courses"]
 
@@ -171,4 +171,16 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+}
+
+REST_FRAMEWORK ={
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"
+}
+
+# CHANGE: SPECTACULAR SETTINGS ON HTML
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'KanvasAPI',
+    'DESCRIPTION': 'API built for managing a distance learning platform.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': True,
 }
