@@ -13,7 +13,9 @@ from pathlib import Path
 from datetime import timedelta
 
 import os
+import dj_database_url
 import dotenv
+from django.core.management.utils import get_random_secret_key
 
 # CHANGE: LOAD VARS ON .ENV
 dotenv.load_dotenv()
@@ -34,6 +36,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# CHANGE: ADD CONFIG FOR RENDER.COM DEPLOY
+# RENDER_EXTERNAL_HOSTNAME WILL BE CREATED BY RENDER.COM AUTOMATICALLY
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS += [RENDER_EXTERNAL_HOSTNAME, "0.0.0.0"]
+
 
 # Application definition
 # SEPARATE APPS
@@ -52,6 +60,7 @@ MY_CREATED_APPS = ["accounts", "contents", "courses", "students_courses"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + MY_CREATED_APPS
 
+# CHANGE: ADD MIDDLEWARE FOR DEPLOY
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -60,6 +69,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "_core.urls"
@@ -97,25 +108,23 @@ DATABASES = {
     }
 }
 
-""" # CHANGE: CONFIG FOR RUN TEST ON OTHER DATABASE
-DATABASES["test"] = {
-    "ENGINE": "django.db.backends.postgresql",
-    "NAME": os.getenv("POSTGRES_DB_TEST"),
-    "USER": os.getenv("POSTGRES_USER"),
-    "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-    "HOST": "127.0.0.1",
-    "PORT": 5432,
-}
+# CHANGE: DATABASE FROM RENDER.COM
+DATABASE_URL = os.getenv("DATABASE_URL", get_random_secret_key())
 
-# CHANGE: ADDITIONAL CONFIG FOR RUNNING TESTS
-if "test" in sys.argv:
-    DATABASES["default"] = DATABASES["test"]
+if DATABASE_URL:
+    db_from_env = dj_database_url.config(
+        default=DATABASE_URL, conn_max_age=500, ssl_require=True
+    )
+    DATABASES["default"].update(db_from_env)
+    DEBUG = False
 
-    # Configure outros ajustes necessários para testes aqui
+if not DEBUG:
+    # Tell Django to copy statics to the `staticfiles` directory in your application directory on Render.
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-    # Exemplo de configuração para usar o banco de dados em memória para testes
-    # DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
-    # DATABASES['default']['NAME'] = ':memory:' """
+    # Turn on WhiteNoise storage backend that takes care of compressing static files
+    # and creating unique names for each version so they can safely be cached forever.
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -162,7 +171,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.Account"
 
 # CHANGE: AUTH TOKEN JWT CONFIGS
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -173,14 +181,12 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
 
-REST_FRAMEWORK ={
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"
-}
+REST_FRAMEWORK = {"DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
 
 # CHANGE: SPECTACULAR SETTINGS ON HTML
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'KanvasAPI',
-    'DESCRIPTION': 'API built for managing a distance learning platform.',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': True,
+    "TITLE": "KanvasAPI",
+    "DESCRIPTION": "API built for managing a distance learning platform.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
 }
