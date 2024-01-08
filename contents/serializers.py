@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Content
-from courses.models import Course
 
 
 class ContentSerializer(serializers.ModelSerializer):

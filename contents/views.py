@@ -13,7 +13,6 @@ from accounts.permissions import IsSuperUserPermission, IsCourseParticipantPermi
 class CreateContentView(CreateAPIView):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
-    # lookup_url_kwarg = "course_id"
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsSuperUserPermission]
