@@ -17,10 +17,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     def validate_username(self, req_username):
         if Account.objects.filter(username=req_username).first():
-            raise ValidationError(
-                "A user with that username already exists.",
-                code=400
-            )
+            raise ValidationError("A user with that username already exists.", code=400)
         return req_username
 
     def create(self, validated_data):

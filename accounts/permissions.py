@@ -10,5 +10,17 @@ class IsSuperUserPermission(permissions.BasePermission):
 
 class IsCourseParticipantPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # Verifica se o usuário está matriculado no curso
-        return request.user in obj.students.all()
+        return (
+            request.method in permissions.SAFE_METHODS
+            and request.user in obj.course.students.all()
+            or request.user.is_superuser
+        )
+
+
+class IsSuperUserOrReadOnlyPermission(permissions.BasePermission):
+    def has_permission(self, request, view: View) -> bool:
+        return (
+            request.user.is_authenticated
+            and request.user.is_superuser
+            or request.method in permissions.SAFE_METHODS
+        )

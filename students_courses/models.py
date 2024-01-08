@@ -13,7 +13,7 @@ class StudentCourse(models.Model):
         null=False,
         choices=StudentCourseStatus.choices,
         default=StudentCourseStatus.PENDING,
-        max_length=50
+        max_length=50,
     )
 
     # Tabela pivô customizada...
@@ -27,5 +27,5 @@ class StudentCourse(models.Model):
         "courses.Course",
         on_delete=models.CASCADE,
         related_name="students_courses",
-        null=False
+        null=False,
     )

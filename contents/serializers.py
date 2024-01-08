@@ -10,8 +10,8 @@ class ContentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "video_url": {"required": False},
         }
-    
+
     def create(self, validated_data):
-        course = self.context['view'].get_object()
+        course = self.context["view"].get_object()
         content = Content.objects.create(course=course, **validated_data)
         return content

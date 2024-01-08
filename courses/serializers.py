@@ -21,9 +21,5 @@ class CourseSerializer(serializers.ModelSerializer):
             "students": {"read_only": True},
             "instructor": {"required": False},
             "status": {"required": False},
-            "students_courses": {"read_only": True}
+            "students_courses": {"read_only": True},
         }
-    students_courses = serializers.SerializerMethodField("get_students_courses")
-
-    def get_students_courses(self, course: Course):
-        return course.students.all()
