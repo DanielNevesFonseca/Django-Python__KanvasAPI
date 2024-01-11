@@ -13,7 +13,7 @@ class StudentsCoursesSerializer(serializers.ModelSerializer):
 
     student_id = serializers.CharField(source="student.id", read_only=True)
     student_username = serializers.CharField(source="student.username", read_only=True)
-    student_email = serializers.CharField(source="student.email")
+    student_email = serializers.CharField(source="student.email", required=True)
 
 
 class CourseStudentSerializer(serializers.ModelSerializer):
@@ -31,12 +31,12 @@ class CourseStudentSerializer(serializers.ModelSerializer):
         for user_raw in validated_data["students_courses"]:
             student = user_raw["student"]
             account = Account.objects.filter(email=student["email"]).first()
-            if not account:
+            if account is None:
                 not_found_students_list.append(student["email"])
             else:
                 found_students_list.append(account)
 
-        if not_found_students_list:
+        if len(not_found_students_list) != 0:
             raise serializers.ValidationError(
                 {"detail": f"No active accounts was found: {", ".join(not_found_students_list)}."}
             )
