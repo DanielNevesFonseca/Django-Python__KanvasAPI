@@ -38,7 +38,7 @@ class CourseStudentSerializer(serializers.ModelSerializer):
 
         if len(not_found_students_list) != 0:
             raise serializers.ValidationError(
-                detail={"detail": f"No active accounts was found: {", ".join([email for email in not_found_students_list])}."}        
+                detail={"detail": f"No active accounts was found: {', ' .join([email for email in not_found_students_list])}."}        
             )
         instance.students.add(*found_students_list)
 
